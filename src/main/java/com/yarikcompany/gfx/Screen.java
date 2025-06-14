@@ -6,8 +6,7 @@ public class Screen {
     private static final int MAP_WIDTH = 64;
     private static final int MAP_WIDTH_MASK = MAP_WIDTH - 1;
 
-    private int[] tiles = new int[MAP_WIDTH * MAP_WIDTH];
-    private int[] colors = new int[MAP_WIDTH * MAP_WIDTH * 4];
+    private int[] pixels;
 
     private int xOffset = 0;
     private int yOffset = 0;
@@ -22,45 +21,34 @@ public class Screen {
         this.height = height;
         this.sheet = sheet;
 
-        for (int i = 0; i < MAP_WIDTH * MAP_WIDTH; i++) {
-            colors[i * 4 + 0] = 0xff00ff;
-            colors[i * 4 + 1] = 0x00ffff;
-            colors[i * 4 + 2] = 0xffff00;
-            colors[i * 4 + 3] = 0xffffff;
-        }
+        pixels = new int[width * height];
     }
 
-    public void render(int[] pixels, int offset, int row) {
-        for (int yTile = yOffset >> 3; yTile <= (yOffset + height) >> 3; yTile++) {
-            int yMin = yTile * 8 - yOffset;
-            int yMax = yMin + 8;
+    public void render(int xPos, int yPos, int tile, int color) {
+        xPos -= xOffset;
+        yPos -= yOffset;
 
-            if (yMin < 0) yMin = 0;
-            if (yMax > height) yMax = height;
+        int xTile = tile % 32;
+        int yTile = tile / 32;
+        int tileOffset = (xTile << 3) + (yTile << 3) * sheet.getWidth();
+        for (int y = 0; y < 8; y++) {
+            if (y + yPos < 0 || y + yPos >= height) continue;
+            int ySheet = y;
+            for (int x = 0; x < 8; x++) {
+                if (x + xPos < 0 || x + xPos >= width) continue;
+                int xSheet = x;
+                int col = (color >> (sheet.getPixels()[xSheet + ySheet * sheet.getWidth() + tileOffset] * 8)) & 255;
 
-            for (int xTile = xOffset >> 3; xTile <= (xOffset + width) >> 3; xTile++) {
-                int xMin = xTile * 8 - xOffset;
-                int xMax = xMin + 8;
-
-                if (xMin < 0) xMin = 0;
-                if (xMax > width) xMax = width;
-
-                int tileindex = (xTile & (MAP_WIDTH_MASK)) + (yTile & (MAP_WIDTH_MASK)) * MAP_WIDTH;
-
-                for (int y = yMin; y < yMax; y++) {
-                   int sheetPixel = ((y + yOffset) & 7) * sheet.getWidth() + ((xMin + xOffset) & 7);
-                   int tilePixel = offset + xMin + y * row;
-                   for (int x = xMin; x < xMax; x++) {
-                       int color = tileindex * 4 + sheet.getPixels()[sheetPixel++];
-                       pixels[tilePixel++] = colors[color];
-                   }
-                }
+                if (col < 255) pixels[(x + xPos) + (y + yPos) * width] = col;
             }
         }
     }
 
     public int getXOffset() { return xOffset; }
     public int getYOffset() { return yOffset; }
+    public int getWidth() { return width; }
+    public int getHeight() { return height; }
+    public int[] getPixels() { return pixels; }
 
     public void setXOffset(int xOffset) { this.xOffset = xOffset; }
     public void setYOffset(int yOffset) { this.yOffset = yOffset; }

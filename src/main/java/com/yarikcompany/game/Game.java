@@ -1,5 +1,6 @@
 package com.yarikcompany.game;
 
+import com.yarikcompany.gfx.Colors;
 import com.yarikcompany.gfx.Screen;
 import com.yarikcompany.gfx.SpriteSheet;
 
@@ -15,6 +16,7 @@ public class Game extends Canvas implements Runnable {
     private static final int WIDTH = 160;
     private static final int HEIGHT = WIDTH / 12 * 9;
     private static final int SCALE = 3;
+    private static final int COLOR_SCALE_FACTOR = 255 / 5;
     private static final String NAME = "Tiny Adventure";
 
     private JFrame frame;
@@ -24,8 +26,10 @@ public class Game extends Canvas implements Runnable {
 
     private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
     private int[] pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
+    private int[] colors = new int[216];
 
     private Screen screen;
+    private InputHandler input;
 
     public Game() {
         setMinimumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
@@ -46,7 +50,20 @@ public class Game extends Canvas implements Runnable {
     }
 
     public void init() {
+        int index = 0;
+        for (int r = 0; r < 6; r++) {
+            for (int g = 0; g < 6; g++) {
+                for (int b = 0; b < 6; b++) {
+                    int rr = (r * COLOR_SCALE_FACTOR);
+                    int gg = (g * COLOR_SCALE_FACTOR);
+                    int bb = (b * COLOR_SCALE_FACTOR);
+
+                    colors[index++] = rr << 16 | gg << 8 | bb;
+                }
+            }
+        }
         screen = new Screen(WIDTH, HEIGHT, new SpriteSheet("/sprite_sheet.png"));
+        input = new InputHandler(this);
     }
 
     public synchronized void start() {
@@ -106,6 +123,11 @@ public class Game extends Canvas implements Runnable {
 
     public void tick() {
         tickCount++;
+
+        if (input.getUp().isPressed()) { screen.setYOffset(screen.getYOffset() - 1);}
+        if (input.getDown().isPressed()) { screen.setYOffset(screen.getYOffset() + 1);}
+        if (input.getLeft().isPressed()) { screen.setXOffset(screen.getXOffset() - 1);}
+        if (input.getRight().isPressed()) { screen.setXOffset(screen.getXOffset() + 1);}
     }
 
     public void render() {
@@ -115,7 +137,18 @@ public class Game extends Canvas implements Runnable {
             return;
         }
 
-        screen.render(pixels, 0, WIDTH);
+        for (int y = 0; y < 32; y++) {
+            for (int x = 0; x < 32; x++) {
+                screen.render(x << 3, y << 3, 0, Colors.get(555, 500, 050, 005));
+            }
+        }
+
+        for (int y = 0; y < screen.getHeight(); y++) {
+            for (int x = 0; x < screen.getWidth(); x++) {
+                int colorCode = screen.getPixels()[x + y * screen.getWidth()];
+                if (colorCode < 255) pixels[x + y * WIDTH] = colors[colorCode];
+            }
+        }
 
         Graphics g = bs.getDrawGraphics();
         g.drawImage(image, 0, 0, getWidth(), getHeight(), null);
