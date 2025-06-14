@@ -3,6 +3,7 @@ package com.yarikcompany.game;
 import com.yarikcompany.gfx.Colors;
 import com.yarikcompany.gfx.Screen;
 import com.yarikcompany.gfx.SpriteSheet;
+import com.yarikcompany.gfx.Font;
 
 import javax.swing.*;
 import java.awt.*;
@@ -139,9 +140,11 @@ public class Game extends Canvas implements Runnable {
 
         for (int y = 0; y < 32; y++) {
             for (int x = 0; x < 32; x++) {
-                screen.render(x << 3, y << 3, 0, Colors.get(555, 500, 050, 005));
+                screen.render(x << 3, y << 3, 0, Colors.get(555, 505, 055, 550), false, true);
             }
         }
+
+        Font.render("Hello World! 0157", screen, 0, 0, Colors.get(000, -1, -1, 555));
 
         for (int y = 0; y < screen.getHeight(); y++) {
             for (int x = 0; x < screen.getWidth(); x++) {
