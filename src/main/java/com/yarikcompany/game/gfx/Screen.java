@@ -1,6 +1,4 @@
-package com.yarikcompany.gfx;
-
-import java.util.Map;
+package com.yarikcompany.game.gfx;
 
 public class Screen {
     private static final int MAP_WIDTH = 64;
@@ -62,4 +60,5 @@ public class Screen {
 
     public void setXOffset(int xOffset) { this.xOffset = xOffset; }
     public void setYOffset(int yOffset) { this.yOffset = yOffset; }
+    public void setOffset(int xOffset, int yOffset) { this.xOffset = xOffset; this.yOffset = yOffset; }
 }

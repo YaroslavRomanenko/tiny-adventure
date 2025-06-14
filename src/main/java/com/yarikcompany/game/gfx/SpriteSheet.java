@@ -1,7 +1,6 @@
-package com.yarikcompany.gfx;
+package com.yarikcompany.game.gfx;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 

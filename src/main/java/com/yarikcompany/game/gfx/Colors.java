@@ -1,4 +1,4 @@
-package com.yarikcompany.gfx;
+package com.yarikcompany.game.gfx;
 
 public class Colors {
     public static int get(int color1, int color2, int color3, int color4) {

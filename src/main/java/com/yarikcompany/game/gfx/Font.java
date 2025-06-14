@@ -1,4 +1,4 @@
-package com.yarikcompany.gfx;
+package com.yarikcompany.game.gfx;
 
 public class Font {
     private static String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ      " +

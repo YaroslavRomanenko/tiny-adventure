@@ -1,9 +1,10 @@
 package com.yarikcompany.game;
 
-import com.yarikcompany.gfx.Colors;
-import com.yarikcompany.gfx.Screen;
-import com.yarikcompany.gfx.SpriteSheet;
-import com.yarikcompany.gfx.Font;
+import com.yarikcompany.game.gfx.Colors;
+import com.yarikcompany.game.gfx.Screen;
+import com.yarikcompany.game.gfx.SpriteSheet;
+import com.yarikcompany.game.gfx.Font;
+import com.yarikcompany.game.level.Level;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,6 +32,7 @@ public class Game extends Canvas implements Runnable {
 
     private Screen screen;
     private InputHandler input;
+    private Level level;
 
     public Game() {
         setMinimumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
@@ -65,6 +67,7 @@ public class Game extends Canvas implements Runnable {
         }
         screen = new Screen(WIDTH, HEIGHT, new SpriteSheet("/sprite_sheet.png"));
         input = new InputHandler(this);
+        level = new Level(64, 64);
     }
 
     public synchronized void start() {
@@ -122,13 +125,17 @@ public class Game extends Canvas implements Runnable {
         }
     }
 
+    private int x = 0, y = 0;
+
     public void tick() {
         tickCount++;
 
-        if (input.getUp().isPressed()) { screen.setYOffset(screen.getYOffset() - 1);}
-        if (input.getDown().isPressed()) { screen.setYOffset(screen.getYOffset() + 1);}
-        if (input.getLeft().isPressed()) { screen.setXOffset(screen.getXOffset() - 1);}
-        if (input.getRight().isPressed()) { screen.setXOffset(screen.getXOffset() + 1);}
+        if (input.getUp().isPressed()) y--;
+        if (input.getDown().isPressed()) y++;
+        if (input.getLeft().isPressed()) x--;
+        if (input.getRight().isPressed()) x++;
+
+        level.tick();
     }
 
     public void render() {
@@ -138,13 +145,18 @@ public class Game extends Canvas implements Runnable {
             return;
         }
 
-        for (int y = 0; y < 32; y++) {
-            for (int x = 0; x < 32; x++) {
-                screen.render(x << 3, y << 3, 0, Colors.get(555, 505, 055, 550), false, true);
-            }
-        }
+        int xOffset = x - (screen.getWidth() / 2);
+        int yOffset = y - (screen.getHeight() / 2);
 
-        Font.render("Hello World! 0157", screen, 0, 0, Colors.get(000, -1, -1, 555));
+        level.renderTiles(screen, xOffset, yOffset);
+
+        for (int x = 0; x < level.getWidth(); x++) {
+            int color = Colors.get(-1, -1, -1, 000);
+            if (x % 10 == 0 && x != 0) {
+                color = Colors.get(-1, -1, -1, 500);
+            }
+            Font.render((x % 10) + "", screen, 0 + (x * 8), 0, color);
+        }
 
         for (int y = 0; y < screen.getHeight(); y++) {
             for (int x = 0; x < screen.getWidth(); x++) {
