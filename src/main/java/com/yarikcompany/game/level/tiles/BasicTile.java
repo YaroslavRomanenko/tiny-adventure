@@ -15,6 +15,6 @@ public class BasicTile extends Tile {
 
     @Override
     public void render(Screen screen, Level level, int x, int y) {
-        screen.render(x, y, tiled, tileColor);
+        screen.render(x, y, tiled, tileColor, 0x00, 1);
     }
 }

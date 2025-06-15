@@ -1,12 +1,18 @@
 package com.yarikcompany.game.level;
 
+import com.yarikcompany.game.entities.Entity;
 import com.yarikcompany.game.gfx.Screen;
 import com.yarikcompany.game.level.tiles.Tile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Level {
     private byte[] tiles;
     private int width;
     private int height;
+
+    private List<Entity> entities = new ArrayList<Entity>();
 
     public Level(int width, int height) {
         tiles = new byte[width * height];
@@ -28,7 +34,9 @@ public class Level {
     }
 
     public void tick() {
-
+        for (Entity e : entities) {
+            e.tick();
+        }
     }
 
     public void renderTiles(Screen screen, int xOffset, int yOffset) {
@@ -46,9 +54,19 @@ public class Level {
         }
     }
 
+    public void renderEntities(Screen screen) {
+        for (Entity e : entities) {
+            e.render(screen);
+        }
+    }
+
     private Tile getTile(int x, int y) {
         if (x < 0 || x > width || y < 0 || y > height) return Tile.VOID;
         return Tile.getTiles()[tiles[x + y * width]];
+    }
+
+    public void addEntity(Entity entity) {
+        this.entities.add(entity);
     }
 
     public int getWidth() { return width; }

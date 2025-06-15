@@ -1,5 +1,6 @@
 package com.yarikcompany.game;
 
+import com.yarikcompany.game.entities.Player;
 import com.yarikcompany.game.gfx.Colors;
 import com.yarikcompany.game.gfx.Screen;
 import com.yarikcompany.game.gfx.SpriteSheet;
@@ -33,6 +34,8 @@ public class Game extends Canvas implements Runnable {
     private Screen screen;
     private InputHandler input;
     private Level level;
+
+    private Player player;
 
     public Game() {
         setMinimumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
@@ -68,6 +71,8 @@ public class Game extends Canvas implements Runnable {
         screen = new Screen(WIDTH, HEIGHT, new SpriteSheet("/sprite_sheet.png"));
         input = new InputHandler(this);
         level = new Level(64, 64);
+        player = new Player(level, 0, 0, input);
+        level.addEntity(player);
     }
 
     public synchronized void start() {
@@ -125,16 +130,8 @@ public class Game extends Canvas implements Runnable {
         }
     }
 
-    private int x = 0, y = 0;
-
     public void tick() {
         tickCount++;
-
-        if (input.getUp().isPressed()) y--;
-        if (input.getDown().isPressed()) y++;
-        if (input.getLeft().isPressed()) x--;
-        if (input.getRight().isPressed()) x++;
-
         level.tick();
     }
 
@@ -145,8 +142,8 @@ public class Game extends Canvas implements Runnable {
             return;
         }
 
-        int xOffset = x - (screen.getWidth() / 2);
-        int yOffset = y - (screen.getHeight() / 2);
+        int xOffset = player.getX() - (screen.getWidth() / 2);
+        int yOffset = player.getY() - (screen.getHeight() / 2);
 
         level.renderTiles(screen, xOffset, yOffset);
 
@@ -155,8 +152,9 @@ public class Game extends Canvas implements Runnable {
             if (x % 10 == 0 && x != 0) {
                 color = Colors.get(-1, -1, -1, 500);
             }
-            Font.render((x % 10) + "", screen, 0 + (x * 8), 0, color);
         }
+
+        level.renderEntities(screen);
 
         for (int y = 0; y < screen.getHeight(); y++) {
             for (int x = 0; x < screen.getWidth(); x++) {
