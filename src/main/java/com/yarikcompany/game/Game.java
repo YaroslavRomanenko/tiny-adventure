@@ -6,6 +6,9 @@ import com.yarikcompany.game.gfx.Screen;
 import com.yarikcompany.game.gfx.SpriteSheet;
 import com.yarikcompany.game.gfx.Font;
 import com.yarikcompany.game.level.Level;
+import com.yarikcompany.game.net.GameClient;
+import com.yarikcompany.game.net.GameServer;
+import com.yarikcompany.game.net.packets.Packet00Login;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,6 +39,10 @@ public class Game extends Canvas implements Runnable {
     private Level level;
 
     private Player player;
+
+    private GameClient socketClient;
+    private GameServer socketServer;
+
 
     public Game() {
         setMinimumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
@@ -70,14 +77,26 @@ public class Game extends Canvas implements Runnable {
         }
         screen = new Screen(WIDTH, HEIGHT, new SpriteSheet("/sprite_sheet.png"));
         input = new InputHandler(this);
-        level = new Level("/levels/small_test_level.png");
-        player = new Player(level, 0, 0, input);
-        level.addEntity(player);
+        level = new Level("/levels/water_level.png");
+//        player = new Player(level, 0, 0, input, JOptionPane.showInputDialog(this, "Please enter a username"));
+//        level.addEntity(player);
+//
+//        socketClient.sendData("ping".getBytes());
+        Packet00Login loginPacket = new Packet00Login(JOptionPane.showInputDialog(this, "Please enter a username"));
+        loginPacket.writeData(socketClient);
     }
 
     public synchronized void start() {
         running = true;
         new Thread(this).start();
+
+        if (JOptionPane.showConfirmDialog(this, "Do you want to run the server") == 0) {
+            socketServer = new GameServer(this);
+            socketServer.start();
+        }
+
+        socketClient = new GameClient(this, "localhost");
+        socketClient.start();
     }
 
     public synchronized void stop() {
@@ -123,7 +142,7 @@ public class Game extends Canvas implements Runnable {
 
             if (System.currentTimeMillis() - lastTimer >= 1000) {
                 lastTimer += 1000;
-                System.out.println("ticks: " + ticks + ", frames: " + frames);
+                frame.setTitle("ticks: " + ticks + ", frames: " + frames);
                 frames = 0;
                 ticks = 0;
             }
@@ -173,4 +192,10 @@ public class Game extends Canvas implements Runnable {
         new Game().start();
         
     }
+
+    public Level getLevel () { return level; }
+    public InputHandler getInput() { return input; }
+    public Player getPlayer() { return player; }
+
+    public void setPlayer(Player player) { this.player = player; }
 }

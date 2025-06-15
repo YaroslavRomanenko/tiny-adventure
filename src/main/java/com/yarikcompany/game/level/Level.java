@@ -88,6 +88,11 @@ public class Level {
         for (Entity e : entities) {
             e.tick();
         }
+
+        for (Tile t : Tile.getTiles()) {
+            if (t == null) { break; }
+            t.tick();
+        }
     }
 
     public void renderTiles(Screen screen, int xOffset, int yOffset) {
@@ -98,8 +103,8 @@ public class Level {
 
         screen.setOffset(xOffset, yOffset);
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+        for (int y = (yOffset >> 3); y < (yOffset + screen.getHeight() >> 3) + 1; y++) {
+            for (int x = (xOffset >> 3); x < (xOffset + screen.getWidth() >> 3) + 1; x++) {
                 getTile(x, y).render(screen, this, x << 3, y << 3);
             }
         }
